@@ -2,7 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  
+
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: 1,
 
@@ -23,8 +23,10 @@ Sentry.init({
       blockAllMedia: true,
     }),
     Sentry.feedbackIntegration({
-        // Additional SDK configuration goes in here, for example:
-        colorScheme: "system",
-      }),
+      // Additional SDK configuration goes in here, for example:
+      colorScheme: "system",
+    }),
   ],
 });
+
+console.log("Sentry client initialized");
