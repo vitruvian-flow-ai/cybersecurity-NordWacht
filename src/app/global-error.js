@@ -2,7 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-export default function GlobalError({ error }: { error: Error }) {
+export default function GlobalError({ error }) {
     Sentry.captureException(error);
 
     return (
