@@ -4,7 +4,6 @@ import Image from "next/image";
 import * as Sentry from "@sentry/nextjs";
 
 export default function Home() {
-  console.log("DSN:", process.env.NEXT_PUBLIC_SENTRY_DSN);
 
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">

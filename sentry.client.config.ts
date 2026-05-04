@@ -29,4 +29,3 @@ Sentry.init({
   ],
 });
 
-console.log("Sentry client initialized");
