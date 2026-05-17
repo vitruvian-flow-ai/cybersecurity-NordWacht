@@ -2,24 +2,37 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import BookingModal from "./BookingModal";
+import RoadmapModal from "./RoadmapModal";
 
 interface BookingContextType {
   openBookingModal: () => void;
   closeBookingModal: () => void;
+  openRoadmapModal: () => void;
+  closeRoadmapModal: () => void;
 }
 
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
 
 export function BookingProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isRoadmapOpen, setIsRoadmapOpen] = useState(false);
 
   const openBookingModal = () => setIsOpen(true);
   const closeBookingModal = () => setIsOpen(false);
 
+  const openRoadmapModal = () => setIsRoadmapOpen(true);
+  const closeRoadmapModal = () => setIsRoadmapOpen(false);
+
   return (
-    <BookingContext.Provider value={{ openBookingModal, closeBookingModal }}>
+    <BookingContext.Provider value={{ 
+      openBookingModal, 
+      closeBookingModal, 
+      openRoadmapModal, 
+      closeRoadmapModal 
+    }}>
       {children}
       <BookingModal key={isOpen ? "open" : "closed"} isOpen={isOpen} onClose={closeBookingModal} />
+      <RoadmapModal key={isRoadmapOpen ? "open" : "closed"} isOpen={isRoadmapOpen} onClose={closeRoadmapModal} />
     </BookingContext.Provider>
   );
 }
