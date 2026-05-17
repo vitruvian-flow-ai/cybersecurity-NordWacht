@@ -49,9 +49,45 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
 
 
-  const handleNext = () => {
-    if (step === "contact") setStep("audit");
-    else if (step === "audit") setStep("calendly");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleNext = async () => {
+    if (step === "contact") {
+      setStep("audit");
+    } else if (step === "audit") {
+      setIsSubmitting(true);
+      try {
+        const response = await fetch("/api/submit-booking", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            orgSize: formData.orgSize,
+            environment: formData.environment,
+            compliance: formData.compliance,
+            priority: formData.priority.trim(),
+            role: formData.role.trim(),
+            timeline: formData.timeline,
+            objective: formData.objective,
+          }),
+        });
+
+        if (!response.ok) {
+          const resData = await response.json().catch(() => ({}));
+          console.warn("[Lead Capture Warning] Webhook submission returned status:", response.status, resData.error);
+        } else {
+          console.log("[Lead Capture Success] Webhook lead capture completed successfully.");
+        }
+      } catch (error) {
+        console.error("[Lead Capture Error] Failed to submit lead to serverless route:", error);
+      } finally {
+        setIsSubmitting(false);
+        setStep("calendly");
+      }
+    }
   };
 
   const handleBack = () => {
@@ -333,10 +369,13 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
             </button>
             <button
               onClick={handleNext}
-              disabled={!formData.name || !formData.email || (step === "audit" && (!formData.orgSize || !formData.environment || !formData.compliance || !formData.priority || !formData.role || !formData.timeline || !formData.objective))}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-300 dark:disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded-full font-semibold transition-all shadow-lg shadow-blue-500/20 disabled:shadow-none"
+              disabled={isSubmitting || !formData.name || !formData.email || (step === "audit" && (!formData.orgSize || !formData.environment || !formData.compliance || !formData.priority || !formData.role || !formData.timeline || !formData.objective))}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-300 dark:disabled:bg-zinc-700 disabled:text-zinc-500 text-white rounded-full font-semibold transition-all shadow-lg shadow-blue-500/20 disabled:shadow-none flex items-center gap-2"
             >
-              {step === "audit" ? "Continue to Calendar" : "Next"}
+              {isSubmitting && (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              )}
+              {step === "audit" ? (isSubmitting ? "Submitting..." : "Continue to Calendar") : "Next"}
             </button>
           </div>
         )}

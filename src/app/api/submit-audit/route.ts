@@ -1,13 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 export async function POST(req: NextRequest) {
+  let firstName = "";
+  let lastName = "";
+  let email = "";
+  let gdprConsent = false;
+  let quizAnswers = null;
+
   try {
     // 1. Parse JSON body
     const body = await req.json();
-    const { firstName, lastName, email, gdprConsent, quizAnswers } = body;
+    firstName = body.firstName;
+    lastName = body.lastName;
+    email = body.email;
+    gdprConsent = body.gdprConsent;
+    quizAnswers = body.quizAnswers;
+
+    // Trim string inputs to avoid whitespace-only submissions
+    const trimmedFirstName = typeof firstName === "string" ? firstName.trim() : "";
+    const trimmedLastName = typeof lastName === "string" ? lastName.trim() : "";
+    const trimmedEmail = typeof email === "string" ? email.trim() : "";
 
     // 2. Validate payload
-    if (!firstName || !lastName || !email || !gdprConsent || !quizAnswers) {
+    if (!trimmedFirstName || !trimmedLastName || !trimmedEmail || !gdprConsent || !quizAnswers) {
       return NextResponse.json(
         { 
           success: false, 
@@ -29,7 +45,7 @@ export async function POST(req: NextRequest) {
 
     // Basic email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(trimmedEmail)) {
       return NextResponse.json(
         { 
           success: false, 
@@ -43,6 +59,7 @@ export async function POST(req: NextRequest) {
     const webhookUrl = process.env.N8N_WEBHOOK_URL;
     if (!webhookUrl) {
       console.error("[Submit Audit Error] N8N_WEBHOOK_URL environment variable is not configured.");
+      Sentry.captureMessage("N8N_WEBHOOK_URL environment variable is missing", "error");
       return NextResponse.json(
         { 
           success: false, 
@@ -53,16 +70,16 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Send request to n8n webhook
-    console.log(`[Submit Audit] Forwarding payload for ${email} to n8n webhook.`);
+    console.log(`[Submit Audit] Forwarding payload for ${trimmedEmail} to n8n webhook.`);
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        firstName,
-        lastName,
-        email,
+        firstName: trimmedFirstName,
+        lastName: trimmedLastName,
+        email: trimmedEmail,
         gdprConsent,
         submittedAt: new Date().toISOString(),
         quizAnswers,
@@ -72,6 +89,16 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
       const responseText = await response.text().catch(() => "");
       console.error(`[Submit Audit Error] n8n responded with status ${response.status}: ${responseText}`);
+      
+      Sentry.captureMessage(`n8n webhook failed with status ${response.status}`, {
+        level: "error",
+        extra: {
+          status: response.status,
+          responseText,
+          email: trimmedEmail,
+        }
+      });
+
       return NextResponse.json(
         { 
           success: false, 
@@ -92,6 +119,14 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error("[Submit Audit Fatal Error]", error);
+    Sentry.captureException(error, {
+      extra: {
+        email,
+        firstName,
+        lastName,
+        quizAnswers,
+      }
+    });
     return NextResponse.json(
       { 
         success: false, 

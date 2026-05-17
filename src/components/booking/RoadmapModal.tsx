@@ -77,9 +77,9 @@ export default function RoadmapModal({ isOpen, onClose }: RoadmapModalProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          firstName: contactInfo.firstName,
-          lastName: contactInfo.lastName,
-          email: contactInfo.email,
+          firstName: contactInfo.firstName.trim(),
+          lastName: contactInfo.lastName.trim(),
+          email: contactInfo.email.trim(),
           gdprConsent: contactInfo.gdprConsent,
           quizAnswers: {
             infrastructure: answers.infrastructure,

@@ -31,8 +31,8 @@ export function BookingProvider({ children }: { children: ReactNode }) {
       closeRoadmapModal 
     }}>
       {children}
-      <BookingModal key={isOpen ? "open" : "closed"} isOpen={isOpen} onClose={closeBookingModal} />
-      <RoadmapModal key={isRoadmapOpen ? "open" : "closed"} isOpen={isRoadmapOpen} onClose={closeRoadmapModal} />
+      <BookingModal key={isOpen ? "booking-open" : "booking-closed"} isOpen={isOpen} onClose={closeBookingModal} />
+      <RoadmapModal key={isRoadmapOpen ? "roadmap-open" : "roadmap-closed"} isOpen={isRoadmapOpen} onClose={closeRoadmapModal} />
     </BookingContext.Provider>
   );
 }
