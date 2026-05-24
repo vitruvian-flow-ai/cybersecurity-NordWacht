@@ -71,6 +71,8 @@ export async function POST(req: NextRequest) {
 
     // 4. Send request to n8n webhook
     console.log(`[Submit Audit] Forwarding payload for ${trimmedEmail} to n8n webhook.`);
+    console.log(`[DEBUG] Webhook URL exactly evaluated as: "${webhookUrl}"`);
+
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
@@ -86,8 +88,11 @@ export async function POST(req: NextRequest) {
       }),
     });
 
+    console.log(`[DEBUG] Webhook Response Status: ${response.status} ${response.statusText}`);
+
     if (!response.ok) {
       const responseText = await response.text().catch(() => "");
+      console.log(`[DEBUG] Webhook Response Body: ${responseText}`);
       console.error(`[Submit Audit Error] n8n responded with status ${response.status}: ${responseText}`);
       
       Sentry.captureMessage(`n8n webhook failed with status ${response.status}`, {
