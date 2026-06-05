@@ -20,7 +20,7 @@ export default function UnsubscribeClient({ email }: UnsubscribeClientProps) {
 
     const unsubscribeUser = async () => {
       try {
-        const res = await fetch("/api/unsubscribe", {
+        const res = await fetch("/api/unsubscribed", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
