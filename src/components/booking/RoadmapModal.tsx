@@ -96,9 +96,10 @@ export default function RoadmapModal({ isOpen, onClose }: RoadmapModalProps) {
       }
 
       setStep("success");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("[Roadmap Submit Error]", err);
-      setError(err.message || "An unexpected error occurred. Please try again.");
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred. Please try again.";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -276,7 +277,7 @@ export default function RoadmapModal({ isOpen, onClose }: RoadmapModalProps) {
           {step === "q3" && (
             <div className="space-y-6">
               <h3 className="text-lg font-bold text-zinc-900 dark:text-white mb-2">
-                What is your organization's primary security threat concern?
+                What is your organization&apos;s primary security threat concern?
               </h3>
               <div className="grid grid-cols-1 gap-4">
                 {[

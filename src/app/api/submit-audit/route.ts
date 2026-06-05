@@ -104,10 +104,15 @@ export async function POST(req: NextRequest) {
         }
       });
 
+      let errorMessage = `Failed to submit data to n8n workflow (status: ${response.status}).`;
+      if (response.status === 404) {
+        errorMessage = "n8n webhook not found. Check workflow active state, webhook path, and whether you are using production or test URL.";
+      }
+
       return NextResponse.json(
         { 
           success: false, 
-          error: `Failed to submit data to n8n workflow (status: ${response.status}).` 
+          error: errorMessage
         },
         { status: 502 }
       );
